@@ -122,14 +122,7 @@ We appreciate any feedback and contributions to improve the system.
 
 ---
 
-## Contributing
-
-Contributions are welcome!  
-Please feel free to submit a pull request or open an issue if you have any suggestions or improvements.
-
----
-
 **Eng. Tyrone Eduardo Rodriguez Motato**  
 Computer Vision Engineer  
 Guayaquil, Ecuador  
-Email: tyrerodr@espol.edu.ec
+Email: tyrerodr@hotmail.com
