@@ -6,26 +6,34 @@
 
 ## Overview
 
-The **Drowsiness Detection System** is a tool designed to monitor a person's alertness in real-time by analyzing facial features. By utilizing computer vision and machine learning techniques, this system can detect signs of drowsiness and alert the user before it becomes dangerous, particularly while driving.
+The **Drowsiness Detection System** is a project designed to monitor a person's alertness in real-time by analyzing facial features.  
+By utilizing computer vision and machine learning techniques, the system aims to detect signs of drowsiness and provide timely alerts — particularly useful for applications like driver monitoring.
+
+This repository focuses on illustrating the full development process, including data capture, auto-labeling, model training, and detection pipeline integration.
+
+---
 
 ## Features
 
-- **Real-time Detection**: Monitors and detects drowsiness in real-time using a webcam or pre-recorded video.
-- **Dual Model Approach**: Utilizes two YOLOv8 models—one for eye state detection (open/closed) and another for yawning detection.
-- **Facial Landmarks**: Analyzes eye closure, head position, and yawning frequency using advanced facial recognition.
-- **Customizable Alerts**: Alerts can be customized based on detection thresholds.
-- **Data Capture**: Captures and logs data for further analysis or training.
-- **Auto Labeling**: Automated bounding box generation using GroundingDINO for training datasets.
-- **User Interface**: A user-friendly interface built with PyQt5 to visualize detection results.
+- **Real-time Monitoring**: Detects signs of drowsiness using a webcam or video input.
+- **Dual Model Detection**: Separate YOLOv8 models for eye closure detection and yawning detection.
+- **Facial Landmarks Analysis**: Tracks eye status, head position, and mouth movements.
+- **Data Capture Pipeline**: Tools to collect and organize custom datasets.
+- **Auto Labeling with GroundingDINO**: Automated bounding box generation.
+- **User Interface**: Built with PyQt5 for real-time visualization and alerts.
 
-### Key Files
+---
 
-- **`AutoLabelling.py`**: Script to automatically label data for training.
-- **`CaptureData.py`**: Captures video data for drowsiness detection.
-- **`DrowsinessDetector.py`**: Core detection logic, including facial landmarks and alert systems.
-- **`LoadData.ipynb`**: Notebook to load and preprocess data.
-- **`RedirectData.ipynb`**: Redirect and manage captured data.
-- **`train.ipynb`**: Jupyter notebook for training the detection model.
+## Key Files
+
+- `AutoLabelling.py`: Script for automated bounding box labeling using GroundingDINO.
+- `CaptureData.py`: Records and logs video data for analysis or training.
+- `DrowsinessDetector.py`: Core detection script integrating real-time inference and alerts.
+- `LoadData.ipynb`: Loads and preprocesses datasets.
+- `RedirectData.ipynb`: Organizes and redirects captured data for training.
+- `train.ipynb`: Notebook for training the YOLO models.
+
+---
 
 ## Installation
 
@@ -38,58 +46,90 @@ The **Drowsiness Detection System** is a tool designed to monitor a person's ale
 2. **Create a virtual environment:**
     ```bash
     python3 -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
 
-3. **Install the dependencies:**
+3. **Install dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
 
-4. **Run the detection script:**
+4. **Run the detection system:**
     ```bash
     python DrowsinessDetector.py
     ```
 
+---
+
 ## Usage
 
-- **Real-Time Detection**: Simply run the `DrowsinessDetector.py` script and ensure your webcam is connected.
-- **Data Capture**: Use `CaptureData.py` to record and log video data for analysis or training purposes.
-- **Training**: Use `train.ipynb` to train the model with custom datasets.
+- **Real-Time Detection:** Run `DrowsinessDetector.py` with a connected webcam to monitor drowsiness.
+- **Data Capture:** Use `CaptureData.py` to collect video frames for training or testing.
+- **Training New Models:** Use `train.ipynb` to retrain the models on your custom datasets.
+
+---
 
 ## How It Works
 
-The system uses two models based on YOLOv8:
+The system uses two separate YOLOv8 models:
 
-1. **Eye Detection Model**: This model detects whether the eyes are open or closed. It was trained using the following public datasets:
-    - [Eyes Dataset](https://www.kaggle.com/datasets/charunisa/eyes-dataset/code)
-    - [MRL Eye Dataset](https://www.kaggle.com/datasets/tauilabdelilah/mrl-eye-dataset)
+1. **Eye Detection Model:**
+   - Classifies eyes as open or closed.
+   - Trained on public datasets:
+     - [Eyes Dataset](https://www.kaggle.com/datasets/charunisa/eyes-dataset/code)
+     - [MRL Eye Dataset](https://www.kaggle.com/datasets/tauilabdelilah/mrl-eye-dataset)
+   - ~53,000 images for training, ~3,000 images for validation.
 
-   Approximately 53,000 images were used for training and 3,000 images for validation.
+2. **Yawning Detection Model:**
+   - Detects yawning (mouth open) vs not yawning (mouth closed).
+   - Trained on:
+     - [Yawning Dataset](https://www.kaggle.com/datasets/deepankarvarma/yawning-dataset-classification?select=yawn)
 
-2. **Yawning Detection Model**: This model detects yawning by classifying images where the mouth is open (yawning) or closed. It was trained using the following public dataset:
-    - [Yawning Dataset](https://www.kaggle.com/datasets/deepankarvarma/yawning-dataset-classification?select=yawn)
+**Auto Labeling:**  
+GroundingDINO was used to generate bounding boxes for YOLO training to improve dataset quality.
 
-To prepare the images for YOLO training, the [GroundingDINO](https://github.com/IDEA-Research/GroundingDINO) library was used to generate bounding boxes, ensuring precise detection areas.
+Once trained, the models' predictions are combined with confidence thresholds and visualized in a PyQt5 GUI.
 
-Once the models were trained, the prediction logic was implemented, setting confidence thresholds for each class (eyes closed/open, yawning/not yawning). The results are displayed through a custom interface created using PyQt5.
+---
 
-### Technologies Used
+## Technologies Used
 
-- **Python**: Core programming language.
-- **YOLOv8**: Used for object detection.
-- **OpenCV**: For computer vision tasks.
-- **GroundingDINO**: For generating bounding boxes.
-- **Keras/TensorFlow**: For model training and inference.
-- **PyQt5**: For the graphical user interface.
+- **Python**
+- **YOLOv8** – Object detection framework.
+- **OpenCV** – Computer vision tasks.
+- **GroundingDINO** – Auto-labeling tool.
+- **TensorFlow / Keras** – Model training.
+- **PyQt5** – Graphical user interface.
+
+---
+
+## Important Note
+
+This repository is intended primarily to showcase the development process of a drowsiness detection system — including data collection, model training, and real-time integration.
+
+The uploaded model weights are **preliminary** and **not fully trained to convergence**.  
+They are mainly for demonstration purposes, and final production-ready models are maintained separately.
+
+We appreciate any feedback and contributions to improve the system.
+
+---
 
 ## Future Improvements
 
-- **Integration with Wearables**: Adding support for wearable devices to monitor heart rate and other vital signs.
-- **Multi-Person Detection**: Expanding the system to detect drowsiness in multiple individuals simultaneously.
-- **Mobile Application**: Developing a mobile app version for on-the-go monitoring.
+- **Integration with Wearables:** Add heart rate or other vitals monitoring.
+- **Multi-Person Detection:** Extend detection to multiple subjects simultaneously.
+- **Mobile Deployment:** Create a mobile app version for real-time on-the-go monitoring.
+
+---
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request or open an issue if you have any suggestions or improvements.
+Contributions are welcome!  
+Please feel free to submit a pull request or open an issue if you have any suggestions or improvements.
 
+---
+
+**Eng. Tyrone Eduardo Rodriguez Motato**  
+Computer Vision Engineer  
+Guayaquil, Ecuador  
+Email: tyrerodr@espol.edu.ec
