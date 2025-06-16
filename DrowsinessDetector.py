@@ -1,7 +1,6 @@
 import queue
 import threading
 import time
-import winsound
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -10,6 +9,16 @@ import sys
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QHBoxLayout, QWidget
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt
+import platform
+
+if platform.system() == "Windows":
+    import winsound
+    def play_alarm():
+        winsound.Beep(1000, 1000)
+else:
+    def play_alarm():
+        print("Alarm sound (non-Windows)")
+
 
 class DrowsinessDetector(QMainWindow):
     def __init__(self):
