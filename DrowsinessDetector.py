@@ -1,45 +1,48 @@
 import streamlit as st
-from streamlit_webrtc import webrtc_streamer, VideoTransformerBase
 import cv2
 import numpy as np
-from ultralytics import YOLO
 import mediapipe as mp
-import threading
-import time
-import platform
 
-if platform.system() == "Windows":
-    import winsound
-    def play_alarm():
-        winsound.Beep(1000, 1000)
-else:
-    def play_alarm():
-        pass  # atau play_sound via streamlit
+# Definisi indeks mata dari MediaPipe Face Mesh
+LEFT_EYE = [362,385,387,263,373,380]
+RIGHT_EYE = [33,160,158,133,153,144]
 
-class DrowsinessTransformer(VideoTransformerBase):
-    def __init__(self):
-        self.face_mesh = mp.solutions.face_mesh.FaceMesh(
-            min_detection_confidence=0.5, min_tracking_confidence=0.5)
-        self.detectyawn = YOLO("runs/detectyawn/train/weights/best.pt")
-        self.detecteye = YOLO("runs/detecteye/train/weights/best.pt")
-        # init state variables...
-        
-    def transform(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        # --- Copy logic dari process_frames di kode asli ---
-        # Deteksi wajah, mata, yawn, update counters
-        # Tambahkan overlay teks atau bounding box jika perlu:
-        cv2.putText(img, f"Blinks: {self.blinks}", (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        return img
+# Fungsi hitung EAR
+def eye_aspect_ratio(lm, idxs, w, h):
+    pts = [(int(lm[i].x*w), int(lm[i].y*h)) for i in idxs]
+    A = np.linalg.norm(np.array(pts[1]) - pts[5])
+    B = np.linalg.norm(np.array(pts[2]) - pts[4])
+    C = np.linalg.norm(np.array(pts[0]) - pts[3])
+    return (A + B) / (2.0 * C)
 
-# Streamlit UI
-st.title("Drowsiness Detector")
-ctx = webrtc_streamer(
-    key="drowsy",
-    video_transformer_factory=DrowsinessTransformer,
-    media_stream_constraints={"video": True, "audio": False},
-)
+st.title("Deteksi Kantuk dari Foto 📸")
+uploaded = st.file_uploader("Unggah foto wajah", type=["jpg","png","jpeg"])
 
-if st.button("Play Alarm"):
-    play_alarm()
+if uploaded:
+    file_bytes = np.asarray(bytearray(uploaded.read()), dtype=np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    st.image(img_rgb, caption="Foto Asli", use_column_width=True)
+
+    mp_face = mp.solutions.face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1)
+    res = mp_face.process(img_rgb)
+
+    if res.multi_face_landmarks:
+        lm = res.multi_face_landmarks[0].landmark
+        h, w, _ = img.shape
+        ear_l = eye_aspect_ratio(lm, LEFT_EYE, w, h)
+        ear_r = eye_aspect_ratio(lm, RIGHT_EYE, w, h)
+        ear = (ear_l + ear_r) / 2.0
+
+        st.write(f"EAR rata-rata: **{ear:.2f}**")
+
+        EAR_THRESH = 0.18
+        if ear < EAR_THRESH:
+            st.warning("📌 Mata tertutup terlalu lama! Risiko kantuk.")
+
+        else:
+            st.success("Selang mata normal.")
+    else:
+        st.error("Tidak terdeteksi wajah.")
+
+    mp_face.close()
